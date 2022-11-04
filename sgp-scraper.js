@@ -26,7 +26,6 @@ document.getElementById ("myButton").addEventListener (
 function ButtonClickAction (zEvent) {
     /*--- For our dummy action, we'll just add a line of text to the top
         of the screen.
-    
     var zNode       = document.createElement ('p');
     zNode.innerHTML = 'The button was clicked.';
     document.getElementById ("myContainer").appendChild (zNode);*/
@@ -35,7 +34,14 @@ function ButtonClickAction (zEvent) {
     const rows = tableElement.querySelectorAll(`tr`);
     const table = Array.from(rows).map((row) => {
       const cols = row.querySelectorAll('td');
-      return Array.from(cols).map((col) => col.innerText);
+      var playerMap = Array.from(cols).map((col) =>col.innerText);
+      if(typeof row.querySelector('img') !== 'undefined' && row.querySelector('img') !== null){
+        let flag = row.querySelector('img').src.toString();
+        playerMap.push(flag.split('/')[5].split('.')[0]);
+      }else{
+        playerMap.push("-");
+      }
+      return playerMap;
     });
     return table;
   }
@@ -65,7 +71,7 @@ function ButtonClickAction (zEvent) {
   );
   const csvDataUrl = createCSVDataUrl(serializeTableAsCSV(table));
 
-  downloadDataUrl(csvDataUrl, 'sgpTable.csv');
+  downloadDataUrl(csvDataUrl, document.querySelector(".sgp-race-name").innerText+'.csv');
 
 }
 
@@ -92,3 +98,4 @@ GM_addStyle ( `
         background:             white;
     }
 ` );
+
