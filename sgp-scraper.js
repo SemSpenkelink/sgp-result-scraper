@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Export Results
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @author       Probably Stackoverflow
-// @description  Adds live example button, with styling.
-// @match        *://beta.simracing.gp/events/*
+// @description  SGP Result downloader
+// @match        *://app.simracing.gp/events/*
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -34,12 +34,20 @@ function ButtonClickAction (zEvent) {
     const rows = tableElement.querySelectorAll(`tr`);
     const table = Array.from(rows).map((row) => {
       const cols = row.querySelectorAll('td');
-      var playerMap = Array.from(cols).map((col) =>col.innerText);
+      var playerMap = Array.from(cols).map((col) => {
+          return col.innerText.replace(/^\s+|\s+$/g, '').split('\n')[0];
+      });
+      console.log(playerMap);
       if(typeof row.querySelector('img') !== 'undefined' && row.querySelector('img') !== null){
         let flag = row.querySelector('img').src.toString();
         playerMap.push(flag.split('/')[5].split('.')[0]);
       }else{
-        playerMap.push("-");
+        playerMap.push("Country");
+        playerMap.push("Car");
+      }
+      let car = row.querySelector('td.sgp-race-results-participant-column.align-center.pl-0 div.sgp-secondary-block');
+      if(car != null){
+          playerMap.push(car.innerText);
       }
       return playerMap;
     });
@@ -69,6 +77,8 @@ function ButtonClickAction (zEvent) {
   const table = parseTable().map((row) =>
     row.map(convertCellToTableDurationFormat)
   );
+
+  // debugging: console.log(table);
   const csvDataUrl = createCSVDataUrl(serializeTableAsCSV(table));
 
   downloadDataUrl(csvDataUrl, document.querySelector(".sgp-race-name").innerText+'.csv');
@@ -98,4 +108,3 @@ GM_addStyle ( `
         background:             white;
     }
 ` );
-
